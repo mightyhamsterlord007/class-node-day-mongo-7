@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 
+
 mongoose.connect('mongodb://localhost:27017/user', { useNewUrlParser: true }, function(err) {
     if (err) {
         console.log('Error: ', err);
@@ -22,12 +23,27 @@ const User = mongoose.model('UserSchema', UserSchema);
 const app = express();
 const port = 3000;
 
+//its telling the app to look for views folder when is requested
+app.set('views', path.join(__dirname, 'views'));
+//tell view engine to use ejs
+app.set('view engine', 'ejs');
+
 app.use(bodyParser.urlencoded({ extended: false }))
 app.use(bodyParser.json())
 app.use(morgan('dev'));
 
 app.get('/signup', function(req, res) {
-    res.send('This works');
+    User.find({}, function(err, results) {
+        if (err) {
+            res.json({
+                confirmation: 'Failure',
+                message: err
+            });
+            return;
+        }
+        res.render('index', {users: results});
+        return;
+    })
 });
 
 app.post('/signup', function(req, res) {
